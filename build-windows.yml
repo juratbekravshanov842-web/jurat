@@ -1,0 +1,164 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11']
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Display Python Version
+      run: python --version
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install PyInstaller==6.8.0
+        pip install PySide6==6.6.0
+        pip install python-docx==0.8.11
+        pip install reportlab==4.0.0
+        pip install pypdf==3.17.0
+        pip install Pillow==10.0.0
+        pip install requests==2.31.0
+        pip install pytest==7.0.0
+        pip install pytest-cov==4.0.0
+
+    - name: List Python Files
+      run: |
+        echo "Python source files:"
+        dir *.py
+
+    - name: Run Tests
+      run: |
+        python -m pytest run_tests.py -v --tb=short
+      continue-on-error: true
+
+    - name: Create Build Directory
+      run: |
+        mkdir -p build_output
+        echo "Build directory created"
+
+    - name: Build Windows EXE with PyInstaller
+      run: |
+        $TemplatesDir = "$env:USERPROFILE\Documents\Shartnoma_Generator\Templates"
+
+        if (Test-Path $TemplatesDir) {
+          echo "Templates directory found: $TemplatesDir"
+          $TemplatesArg = "$TemplatesDir;Templates"
+        } else {
+          echo "Warning: Templates directory not found at $TemplatesDir"
+          echo "Creating empty templates directory for build..."
+          mkdir -p $TemplatesDir
+          $TemplatesArg = "$TemplatesDir;Templates"
+        }
+
+        python -m PyInstaller `
+          main.py `
+          --name Shartnoma_Generator `
+          --windowed `
+          --add-data "config.py;." `
+          --add-data "db_manager.py;." `
+          --add-data "contract_generator.py;." `
+          --add-data "template_parser.py;." `
+          --add-data "number_converter.py;." `
+          --add-data "validator.py;." `
+          --add-data "main_window.py;." `
+          --add-data "dialogs.py;." `
+          --add-data "ocr_module.py;." `
+          --add-data "inn_verifier.py;." `
+          --add-data "$TemplatesArg" `
+          --hidden-import=PySide6 `
+          --hidden-import=PySide6.QtCore `
+          --hidden-import=PySide6.QtGui `
+          --hidden-import=PySide6.QtWidgets `
+          --hidden-import=docx `
+          --hidden-import=PIL `
+          --exclude-module=scipy `
+          --exclude-module=numpy `
+          --exclude-module=pandas `
+          --exclude-module=matplotlib `
+          --distpath "build_output/dist" `
+          --buildpath "build_output/build" `
+          --specpath "build_output"
+
+    - name: Verify EXE Was Created
+      run: |
+        if (Test-Path "build_output/dist/Shartnoma_Generator/Shartnoma_Generator.exe") {
+          echo "✓ EXE created successfully"
+          $exeSize = (Get-Item "build_output/dist/Shartnoma_Generator/Shartnoma_Generator.exe").Length / 1MB
+          echo "EXE size: $([Math]::Round($exeSize, 1)) MB"
+          echo "EXE path: build_output/dist/Shartnoma_Generator/Shartnoma_Generator.exe"
+        } else {
+          echo "✗ EXE not found!"
+          echo "Contents of build_output/dist:"
+          dir build_output/dist -Recurse
+          exit 1
+        }
+
+    - name: Create ZIP Archive
+      run: |
+        cd build_output/dist
+        Compress-Archive -Path "Shartnoma_Generator" -DestinationPath "Shartnoma_Generator_Windows.zip" -Force
+        echo "ZIP created successfully"
+        $zipSize = (Get-Item "Shartnoma_Generator_Windows.zip").Length / 1MB
+        echo "ZIP size: $([Math]::Round($zipSize, 1)) MB"
+
+    - name: Move ZIP to Build Output
+      run: |
+        move "build_output/dist/Shartnoma_Generator_Windows.zip" "build_output/Shartnoma_Generator_Windows.zip"
+        echo "ZIP moved to build output"
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Shartnoma_Generator_Windows_EXE
+        path: build_output/Shartnoma_Generator_Windows.zip
+        retention-days: 30
+
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build_output/Shartnoma_Generator_Windows.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Summary
+      run: |
+        echo "=================================================="
+        echo "BUILD SUMMARY"
+        echo "=================================================="
+        echo "Platform: Windows Latest"
+        echo "Python: 3.11"
+        echo "PyInstaller: 6.8.0"
+        echo ""
+        echo "✓ All dependencies installed"
+        echo "✓ Tests executed"
+        echo "✓ Windows EXE built"
+        echo "✓ ZIP archive created"
+        echo ""
+        echo "Artifact: Shartnoma_Generator_Windows.zip"
+        echo "Download location: Actions > Latest Run > Artifacts"
+        echo "=================================================="

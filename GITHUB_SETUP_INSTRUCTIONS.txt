@@ -1,0 +1,202 @@
+================================================================================
+SHARTNOMA GENERATOR - GITHUB ACTIONS WINDOWS BUILD SETUP
+================================================================================
+
+MUHIM: Bu fayllar sizning GitHub repository'ingizga yuklanishi kerak.
+
+AGAR GITHUB REPOSITORY MAVJUD BO'LSA:
+================================================================================
+
+1. WORKFLOW FAYLINI REPOSITORY'GA QUSHISH:
+
+   a) Sizning kompyuteringizda terminal/PowerShell ochib, repository papkasiga boring:
+      cd C:\Users\[YourUsername]\...\Shartnoma_Generator
+
+   b) Quyidagi papkasini yarating:
+      mkdir .github\workflows
+
+   c) build-windows.yml faylini shu papkaga joylashtiring:
+      .github\workflows\build-windows.yml
+
+   d) Barcha Python fayllarini repository'da mavjud ekanligiga ishonch hosil qiling:
+      - main.py
+      - config.py
+      - db_manager.py
+      - contract_generator.py
+      - template_parser.py
+      - number_converter.py
+      - validator.py
+      - main_window.py
+      - dialogs.py
+      - ocr_module.py
+      - inn_verifier.py
+      - run_tests.py
+
+
+2. GIT'DA COMMIT VA PUSH QILISH:
+
+   Terminal/PowerShell'da:
+
+   git add .github/workflows/build-windows.yml
+   git add *.py
+   git commit -m "Add GitHub Actions Windows build workflow"
+   git push origin main
+
+   (yoki 'develop' branch'ga push qilsangiz ham bo'ladi)
+
+
+3. GITHUB'DA BUILD ISHGA TUSHIRI:
+
+   a) https://github.com/[YourUsername]/[YourRepoName] ga boring
+
+   b) "Actions" tab'ini bosing
+
+   c) "Build Windows EXE" workflow'ni ko'rasiz
+
+   d) Agar manual ishga tushirmoqchi bo'lsangiz:
+      - "Build Windows EXE"ni bosing
+      - "Run workflow" tugmasini bosing
+      - Branch tanlang (main yoki develop)
+      - "Run workflow" bosing
+
+   e) Build jarayoni boshlandi. Status ko'rish uchun:
+      - "Build Windows EXE" link'iga bosing
+      - "build-windows" job'ining jarayonini ko'ring
+      - Build 5-15 minutni olishi mumkin
+
+
+4. TAYYOR ZIP'NI DOWNLOAD QILISH:
+
+   Build tugagach:
+
+   a) Build'ni bosing (yeşil ✓ bo'lishi kerak)
+
+   b) Pastda "Artifacts" bo'limini ko'ring
+
+   c) "Shartnoma_Generator_Windows_EXE" link'iga bosing
+
+   d) "Shartnoma_Generator_Windows.zip" avtomatik download bo'ladi
+
+   SHUNAQA! Tayyor Windows .exe olding!
+
+
+5. ZIP'NI EXTRACT VA ISHGA TUSHIRISH:
+
+   a) Yuklab olingan ZIP'ni extract qiling
+      (Windows'da: sog' bosib "Extract All")
+
+   b) Shartnoma_Generator papkasini oching
+
+   c) Shartnoma_Generator.exe'ni ikki marta bosing
+
+   d) Dastur ishga tushadi!
+
+
+================================================================================
+AGAR GITHUB REPOSITORY YO'Q BO'LSA:
+================================================================================
+
+1. GITHUB'DA REPOSITORY YARATISH:
+
+   a) https://github.com/new ga boring
+
+   b) Repository nomini kiriting:
+      shartnoma-generator
+
+   c) Description (ixtiyoriy):
+      Uzbek contract generator for businesses
+
+   d) "Create repository" bosing
+
+
+2. GIT'NI O'RNATISH (agar mavjud bo'lmasa):
+
+   a) https://git-scm.com/download/win dan Git'ni yuklab oling
+
+   b) Installer'ni ishga tushiring (Default sozlamalar yaxshi)
+
+   c) PowerShell'ni qayta ochib test qiling:
+      git --version
+
+
+3. LOCAL REPOSITORY YARATISH:
+
+   PowerShell'da:
+
+   cd C:\Users\[YourUsername]\[FolderPath]
+   git init
+   git add .
+   git commit -m "Initial commit: Shartnoma Generator source"
+   git branch -M main
+   git remote add origin https://github.com/[YourUsername]/shartnoma-generator.git
+   git push -u origin main
+
+
+4. WORKFLOW FAYLINI QUSHISH:
+
+   a) Local repository'da:
+      mkdir .github\workflows
+
+   b) build-windows.yml faylini shu papkaga joylashtiring
+
+   c) Commit va push qiling:
+      git add .github/workflows/build-windows.yml
+      git commit -m "Add Windows build workflow"
+      git push
+
+
+5. Qolgan qadamlar yuqoridagiga o'xshash (qarang: "GITHUB'DA BUILD ISHGA TUSHIRI")
+
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+PROBLEM: Build failed - "Python module not found"
+SOLUTION:
+  - Barcha .py fayllar repository root'da ekanligiga ishonch hosil qiling
+  - Main branch'ga push qiling va qayta ishga tushiring
+
+PROBLEM: "EXE not found after build"
+SOLUTION:
+  - Workflow log'ini ko'ring va xatoni o'qing
+  - PyInstaller chiqargan xatolikni tekshiring
+  - Agar template masalasi bo'lsa, workflow avtomatik yaratadi
+
+PROBLEM: Artifact ko'rinmaydi
+SOLUTION:
+  - Build fully tugagandan keyin (yeşil ✓) ko'ring
+  - Page'ni refresh qiling
+  - "Actions" tab'iga qayta boring
+
+PROBLEM: ZIP yuklanmaydi/extracted bo'lmaydi
+SOLUTION:
+  - Windows 10/11 built-in zip extraction ishlashi kerak
+  - 7-Zip o'rnatib ishlatib ko'ring: https://www.7-zip.org
+
+
+================================================================================
+KERAKLI LINKLAR
+================================================================================
+
+GitHub: https://github.com
+Git Download: https://git-scm.com/download/win
+7-Zip: https://www.7-zip.org/download.html
+Python 3.11: https://www.python.org/downloads/
+
+
+================================================================================
+QISQA XULOSA
+================================================================================
+
+1. Workflow faylini .github/workflows/build-windows.yml ga qo'ying
+2. GitHub'ga push qiling
+3. Actions tab'idan build jarayonini kuzating
+4. Tugagach ZIP'ni download qiling
+5. Extract qiling
+6. EXE'ni ishga tushiring
+
+HAMMA SHUKI! 🚀
+
+
+Ko'rsatma qo'shimcha savollar bo'lsa, bilgila!
